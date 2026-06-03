@@ -178,7 +178,6 @@
         }
         .btn-submit:hover { background: #b31b15; }
 
-        /* THIẾT KẾ MỚI: Hộp thoại cảnh báo ảo (Custom Modal) ép hiển thị trên Android/iOS */
         .custom-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -189,7 +188,7 @@
             z-index: 9999;
             padding: 20px;
             box-sizing: border-box;
-            display: none; /* Mặc định ẩn */
+            display: none;
         }
         .modal-content {
             background: #fff;
@@ -355,6 +354,9 @@
 </div>
 
 <script>
+    // ĐƯỜNG LINK GOOGLE APPS SCRIPT ĐỂ ĐỒNG BỘ ĐÁM MÂY
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGSutA94Kt8DmXzg8Dcq0XcUfDwCcL22nzDq53JCGQUA7LfZDct8oNnYiIg0MD5RFP9g/exec";
+
     const originalQuestions = [
         { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
         { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
@@ -375,7 +377,7 @@
         { id: 17, text: "Biểu hiện nào sau đây phản ánh đúng nhất tinh thần \"Liêm\" của cán bộ, đảng viên trong giai đoạn hiện nay theo lời dạy của Bác?", options: { A: "Chỉ giữ mình trong sạch ở cơ quan, không quan tâm đến các hoạt động kinh tế của gia đình.", B: "Luôn cam chịu hoàn cảnh khó khăn, không chủ động tìm giải pháp nâng cao hiệu quả công việc.", C: "Không tham địa vị, không tham tiền tài, không dìm người khác để tâng bốc mình, luôn tôn trọng của công và tài sản công dân.", D: "Từ chối tham gia các hoạt động ngoại giao hoặc tiếp khách của cơ quan để tránh bị nghi ngờ." }, correct: "C" },
         { id: 18, text: "Mối quan hệ biện chứng giữa ba phẩm chất \"Cần\", \"Kiệm\" và \"Liêm\" trong tư tưởng Hồ Chí Minh được thể hiện như thế nào?", options: { A: "\"Cần\" và \"Kiệm\" là hai phẩm chất hoàn toàn độc lập, không có mối liên hệ hay tác động gì đến chữ \"Liêm\".", B: "Phải \"Cần\", \"Kiệm\" trước thì mới tạo ra và giữ gìn được của cải, từ đó mới có nền tảng vật chất để giữ mình trong sạch, thực hành chữ \"Liêm\".", C: "Chỉ cần thực hành chữ \"Liêm\" một cách triệt để thì tự khắc năng suất lao động của chữ \"Cần\" sẽ tăng cao.", D: "Người cán bộ chỉ cần siêng năng (\"Cần\"), còn việc tiêu xài hoang phí hay hoài phí của công không ảnh hưởng đến phẩm chất đạo đức." }, correct: "B" },
         { id: 19, text: "Ý nghĩa cốt lõi của việc thực hành đức tính \"Chính\" đối với một người cán bộ lãnh đạo, quản lý là gì?", options: { A: "Luôn làm việc đúng theo pháp luật và đạo đức, không tự cao tự đại, luôn hướng về việc thiện, không vì lợi ích cá nhân mà làm việc tà.", B: "Giữ thái độ nghiêm khắc tuyệt đối, không lắng nghe ý kiến phản hồi từ cấp dưới để bảo vệ uy quyền.", C: "Tập trung xây dựng các quy chế xử phạt thật nặng đối với nhân viên vi phạm quy định cơ quan.", D: "Luôn tìm cách che giấu khuyết điểm của bản thân và đơn vị để bảo đảm an thành tích thi đua chung." }, correct: "A" },
-        { id: 20, text: "Khi một người cán bộ thực hành tinh thần \"Chí công vô tư\", điều đó có đồng nghĩa với việc phủ nhận hoàn toàn lợi ích cá nhân chính đáng không?", options: { A: "Có, vì người cán bộ cách mạng phải tuyệt đối từ bỏ mọi nhu cầu, sở thích và lợi ích cá nhân trong cuộc sống.", B: "Không, vì Bác dạy lợi ích cá nhân hợp pháp, chính đáng luôn được tôn trọng; thực hành \"Chí công vô tư\" là khi lợi ích cá nhân mâu thuẫn với lợi ích chung thì phải đặt lợi ích chung lên trên hết.", C: "Có, lợi ích tập thể và lợi ích cá nhân luôn đối lập, triệt tiêu lẫn nhau trong mọi hoàn cảnh phát triển xã hội.", D: "Không, vì lợi ích của tập thể thực chất chỉ là công cụ để phục vụ tối đa cho lợi ích của người đứng đầu cơ quan." }, correct: "B" }
+        { id: 20, text: "Khi một người cán bộ thực hành tinh thần \"Chí công vô tư\", điều đó có đồng nghĩa với việc phủ nhận hoàn toàn lợi ích cá nhân chính đáng không?", options: { A: "Có, vì người cán bộ cách mạng phải tuyệt đối từ bỏ mọi nhu cầu, sở thích và lợi ích cá nhân trong cuộc sống.", B: "Không, vì Bác dạy lợi ích cá nhân hợp pháp, chính đáng luôn được tôn trọng; thực hành \"Chí công vô tư\" là khi lợi ích cá nhân mâu chuẫn với lợi ích chung thì phải đặt lợi ích chung lên trên hết.", C: "Có, lợi ích tập thể và lợi ích cá nhân luôn đối lập, triệt tiêu lẫn nhau trong mọi hoàn cảnh phát triển xã hội.", D: "Không, vì lợi ích của tập thể thực chất chỉ là công cụ để phục vụ tối đa cho lợi ích của người đứng đầu cơ quan." }, correct: "B" }
     ];
 
     let currentQuestionsOrder = [];
@@ -403,44 +405,32 @@
         return array;
     }
 
-    // THUẬT TOÁN ĐÃ ĐƯỢC THAY ĐỔI CƠ CHẾ MODAL: CHỐNG TRÌNH DUYỆT MOBILE CHẶN WINDOW.ALERT
     function setupAntiCheat() {
         document.addEventListener("visibilitychange", function() {
             if (document.hidden && isQuizActive && !isSubmitting) {
                 const now = Date.now();
-                if (now - lastCheatTime < 1500) {
-                    return; 
-                }
-                
+                if (now - lastCheatTime < 1500) { return; }
                 lastCheatTime = now; 
                 cheatCount++;
-                
                 if (cheatCount === 1) {
-                    // Vi phạm lần 1: Dừng đồng hồ đếm ngược ngay lập tức
                     clearInterval(timer);
                 } else if (cheatCount >= 2) {
-                    // Vi phạm lần 2: Đánh dấu gian lận và tự động khóa hệ thống nộp bài
                     isCheater = true;
                     clearInterval(timer);
                 }
             } else if (!document.hidden && isQuizActive && !isSubmitting) {
-                // KHI NGƯỜI DÙNG QUAY LẠI MÀN HÌNH TRÌNH DUYỆT (RESUME/FOCUS)
                 if (isCheater) {
-                    // Nếu đã vi phạm lần 2: Bắn thông báo cuối và ép nộp bài ngay
                     alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
                     submitQuiz(false, true);
                 } else if (cheatCount === 1) {
-                    // Nếu vi phạm lần 1: Bật hiển thị hộp thoại ảo HTML chặn toàn bộ màn hình điện thoại iOS/Android
                     document.getElementById('cheatModal').style.display = 'flex';
                 }
             }
         });
     }
 
-    // Hàm xử lý đóng hộp thoại ảo khi Đảng viên bấm nút xác nhận cam kết
     function closeCheatModal() {
         document.getElementById('cheatModal').style.display = 'none';
-        // Kích hoạt lại đồng hồ chạy tiếp tục tính thời gian
         clearInterval(timer);
         timer = setInterval(updateTimer, 1000);
     }
@@ -455,7 +445,6 @@
 
         document.getElementById('fullName').disabled = true;
         document.getElementById('startBtn').style.display = 'none';
-        
         document.getElementById('timerBox').style.display = 'block';
         document.getElementById('quizForm').style.display = 'block';
 
@@ -478,7 +467,6 @@
     function generateShuffledQuiz() {
         const container = document.getElementById('quizContainer');
         container.innerHTML = '';
-        
         currentQuestionsOrder = shuffle([...originalQuestions]);
 
         currentQuestionsOrder.forEach((q, index) => {
@@ -516,7 +504,6 @@
     function buildQuestionGrid() {
         const gridContainer = document.getElementById('questionGrid');
         gridContainer.innerHTML = '';
-        
         currentQuestionsOrder.forEach((_, index) => {
             const btn = document.createElement('div');
             btn.className = 'grid-item';
@@ -532,9 +519,25 @@
 
     function updateGridStatus(index) {
         const gridItem = document.getElementById(`gridItem_${index}`);
-        if (gridItem) {
-            gridItem.classList.add('answered');
+        if (gridItem) { gridItem.classList.add('answered'); }
+    }
+
+    // Đồng bộ chức năng gửi dữ liệu tự động lên đám mây Google Sheets công khai
+    function sendDataToGoogleSheets(resultData) {
+        if (!SCRIPT_URL || SCRIPT_URL.indexOf("THAY_LINK_") === 0) {
+            console.log("Chưa cấu hình link Google Sheets để lưu trữ dữ liệu tập trung.");
+            return;
         }
+
+        // Tạo yêu cầu mạng ngầm không gây đứng màn hình (Fetch API)
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Bỏ qua cơ chế khóa bảo mật chéo của Google
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(resultData)
+        })
+        .then(() => console.log("Đã đồng bộ kết quả lên máy chủ Google Sheets tập trung thành công."))
+        .catch(err => console.error("Lỗi đồng bộ đám mây:", err));
     }
 
     function showQuestion(index) {
@@ -580,31 +583,24 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             document.getElementById('timerBox').innerText = `Thời gian: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            if (timeLeft <= 60) {
-                document.getElementById('timerBox').style.color = '#da251d'; 
-            }
+            if (timeLeft <= 60) { document.getElementById('timerBox').style.color = '#da251d'; }
         }
     }
 
     function submitQuiz(isTimeout = false, forcedByCheat = false) {
         if (isSubmitting) return;
-        
         const nameInput = document.getElementById('fullName').value.trim();
-        
         if (!isTimeout && !forcedByCheat) {
-            if (!confirm('Đồng chí có chắc chắn muốn nộp câu trả lời ngay không?')) {
-                return;
-            }
+            if (!confirm('Đồng chí có chắc chắn muốn nộp câu trả lời ngay không?')) { return; }
         }
 
         isSubmitting = true;
         isQuizActive = false;
         clearInterval(timer);
-        document.getElementById('cheatModal').style.display = 'none'; // Ẩn modal nếu đang hiện
+        document.getElementById('cheatModal').style.display = 'none';
 
         const endTime = new Date();
         const totalDurationSeconds = Math.floor((endTime - startTime) / 1000);
-        
         const durationMinutes = Math.floor(totalDurationSeconds / 60);
         const durationSeconds = totalDurationSeconds % 60;
         const durationString = forcedByCheat ? "Bị thu bài do gian lận" : `${durationMinutes} phút ${durationSeconds} giây`;
@@ -612,9 +608,7 @@
         let correctCount = 0;
         originalQuestions.forEach(q => {
             const selected = document.querySelector(`input[name="question_${q.id}"]:checked`);
-            if (selected && selected.value === q.correct) {
-                correctCount++;
-            }
+            if (selected && selected.value === q.correct) { correctCount++; }
         });
 
         const finalScore = ((correctCount / 20) * 10).toFixed(1);
@@ -632,6 +626,10 @@
             isViolator: forcedByCheat || isCheater 
         };
 
+        // 1. Đồng bộ gửi dữ liệu tức thời về tệp Google Sheets tập trung đám mây của đồng chí
+        sendDataToGoogleSheets(currentResult);
+
+        // 2. Lưu bộ nhớ cục bộ trên thiết bị của cá nhân
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
         allResults.push(currentResult);
         localStorage.setItem('partyQuizResults', JSON.stringify(allResults));
@@ -668,38 +666,29 @@
         const chronologicalArray = [...safeArray].sort((a, b) => a.timestamp - b.timestamp);
         
         chronologicalArray.forEach(res => {
-            if (!firstAttemptsMap.has(res.name)) {
-                firstAttemptsMap.set(res.name, res);
-            }
+            if (!firstAttemptsMap.has(res.name)) { firstAttemptsMap.set(res.name, res); }
         });
 
         let validEntries = Array.from(firstAttemptsMap.values());
-
         validEntries.sort((a, b) => {
-            if (b.scoreThang10 !== a.scoreThang10) {
-                return b.scoreThang10 - a.scoreThang10;
-            }
+            if (b.scoreThang10 !== a.scoreThang10) { return b.scoreThang10 - a.scoreThang10; }
             return a.durationSeconds - b.durationSeconds;
         });
 
         const rankMap = new Map();
         validEntries.forEach((entry, index) => {
-            if (index > 0 && 
-                validEntries[index - 1].scoreThang10 === entry.scoreThang10 && 
-                validEntries[index - 1].durationSeconds === entry.durationSeconds) {
+            if (index > 0 && validEntries[index - 1].scoreThang10 === entry.scoreThang10 && validEntries[index - 1].durationSeconds === entry.durationSeconds) {
                 rankMap.set(entry.timestamp, rankMap.get(validEntries[index - 1].timestamp));
             } else {
                 rankMap.set(entry.timestamp, index + 1);
             }
         });
-
         return rankMap;
     }
 
     function displayResults() {
         const tableBody = document.getElementById('resultTableBody');
         tableBody.innerHTML = '';
-        
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
         allResults = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
 
@@ -709,7 +698,6 @@
         }
 
         const rankMap = processRankings(allResults);
-
         const userMinTimestampMap = new Map();
         allResults.forEach(res => {
             if (!userMinTimestampMap.has(res.name) || res.timestamp < userMinTimestampMap.get(res.name)) {
@@ -718,16 +706,13 @@
         });
 
         let sortedDisplayArray = [...allResults].sort((a, b) => {
-            if (b.scoreThang10 !== a.scoreThang10) {
-                return b.scoreThang10 - a.scoreThang10;
-            }
+            if (b.scoreThang10 !== a.scoreThang10) { return b.scoreThang10 - a.scoreThang10; }
             return a.durationSeconds - b.durationSeconds;
         });
         
         sortedDisplayArray.forEach((res, index) => {
             let rankText = "";
             let rankClass = "rank-cell";
-
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
             if (res.isViolator) {
@@ -757,7 +742,6 @@
     function secureClearResults() {
         const password = prompt('Vui lòng nhập mật khẩu quản trị để thực hiện xóa toàn bộ dữ liệu:');
         if (password === null) return; 
-
         if (password === 'tplaocai') {
             if (confirm('Xác nhận: Đồng chí có chắc chắn muốn xóa sạch toàn bộ danh sách kết quả không?')) {
                 localStorage.removeItem('partyQuizResults');
@@ -772,7 +756,6 @@
     function exportToExcel() {
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
         allResults = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
-        
         if (allResults.length === 0) {
             alert('Hiện tại chưa có dữ liệu kết quả nào để xuất file Excel!');
             return;
@@ -787,9 +770,7 @@
         });
 
         let sortedExcelArray = [...allResults].sort((a, b) => {
-            if (b.scoreThang10 !== a.scoreThang10) {
-                return b.scoreThang10 - a.scoreThang10;
-            }
+            if (b.scoreThang10 !== a.scoreThang10) { return b.scoreThang10 - a.scoreThang10; }
             return a.durationSeconds - b.durationSeconds;
         });
 
@@ -865,7 +846,6 @@
 
         const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const link = document.createElement("a");
-        
         const dateObj = new Date();
         const fileDate = `${dateObj.getFullYear()}${(dateObj.getMonth()+1).toString().padStart(2,'0')}${dateObj.getDate().toString().padStart(2,'0')}`;
         

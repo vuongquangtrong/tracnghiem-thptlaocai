@@ -9,7 +9,7 @@
             --primary-color: #da251d;
             --secondary-color: #fff200;
             --text-color: #333;
-            --bg-overlay: rgba(244, 244, 249, 0.92); /* Lớp phủ mờ giúp đọc chữ rõ hơn */
+            --bg-overlay: rgba(244, 244, 249, 0.92);
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -17,14 +17,12 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            /* Tích hợp ảnh lễ khai giảng toàn cảnh làm hình nền trang web */
             background-image: url('anh-nen.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
-        /* Lớp phủ đè lên ảnh nền để nội dung thi hiển thị rõ ràng, không bị chói */
         .page-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -32,14 +30,14 @@
             z-index: 1;
         }
         .container {
-            max-width: 850px;
+            max-width: 950px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.98);
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             position: relative;
-            z-index: 2; /* Đẩy nội dung lên trên lớp ảnh nền */
+            z-index: 2;
         }
         .header-panel {
             display: flex;
@@ -53,7 +51,6 @@
             border-bottom: 4px solid var(--secondary-color);
             gap: 20px;
         }
-        /* Cấu hình hiển thị Logo trường THPT Lào Cai */
         .school-logo {
             width: 90px;
             height: 90px;
@@ -152,14 +149,15 @@
             justify-content: flex-end;
             gap: 10px;
         }
-        table { width: 100%; border-collapse: collapse; background: #fff; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; font-weight: bold; color: #333; }
+        table { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; color: #333; text-align: center; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         
-        /* Căn giữa dữ liệu cột thời gian và số câu đúng */
         .center-cell { text-align: center; }
-        .highlight { font-weight: bold; color: var(--primary-color); text-align: center; }
+        .score-cell { font-weight: bold; color: #da251d; text-align: center; }
+        .rank-cell { font-weight: bold; color: #27ae60; text-align: center; }
+        .retry-cell { font-style: italic; color: #7f8c8d; text-align: center; }
         
         .excel-btn {
             background: #27ae60;
@@ -187,13 +185,15 @@
         }
         .clear-btn:hover { background: #c0392b; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .header-panel { flex-direction: column; text-align: center; }
             .header-text { text-align: center; }
             .info-section input[type="text"] { width: 100%; margin-bottom: 10px; }
             .btn-start { width: 100%; margin-left: 0; }
             .timer-box { position: static; margin-top: 10px; text-align: center; }
             .button-group { justify-content: center; }
+            table { font-size: 11px; }
+            th, td { padding: 6px 4px; }
         }
     </style>
 </head>
@@ -215,12 +215,12 @@
         <label for="fullName">THÔNG TIN ĐẢNG VIÊN ĐĂNG NHẬP:</label>
         <input type="text" id="fullName" placeholder="Nhập đầy đủ Họ và Tên của đồng chí...">
         <button type="button" class="btn-start" id="startBtn" onclick="startQuiz()">Bắt Đầu Làm Bài</button>
-        <div class="timer-box" id="timerBox">Thời gian: 15:00</div>
+        <div class="timer-box" id="timerBox">Thời gian: 10:00</div>
     </div>
 
     <form id="quizForm" class="quiz-form">
         <div id="quizContainer"></div>
-        <button type="button" class="btn-submit" onclick="submitQuiz(false)">Nộp Bài Trả Lời</button>
+        <button type="button" class="btn-submit" onclick="submitQuiz(false)">Nộp câu trả lời</button>
     </form>
 
     <div class="result-section">
@@ -234,10 +234,13 @@
         <table id="resultTable">
             <thead>
                 <tr>
-                    <th style="width: 10%; text-align: center;">STT</th>
-                    <th style="width: 40%;">Họ và Tên</th>
-                    <th style="width: 30%; text-align: center;">Thời Gian Nộp</th>
-                    <th style="width: 20%; text-align: center;">Số câu đúng</th>
+                    <th style="width: 5%;">STT</th>
+                    <th style="width: 23%;">Họ và Tên</th>
+                    <th style="width: 17%;">Thời Gian Nộp</th>
+                    <th style="width: 13%;">Số câu đúng</th>
+                    <th style="width: 15%;">Tổng thời gian</th>
+                    <th style="width: 12%;">Điểm bài thi</th>
+                    <th style="width: 15%;">Thứ hạng</th>
                 </tr>
             </thead>
             <tbody id="resultTableBody">
@@ -247,7 +250,6 @@
 </div>
 
 <script>
-    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx - ĐÃ SỬA LỖI CẤU TRÚC CÂU 14
     const originalQuestions = [
         { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
         { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
@@ -268,8 +270,9 @@
 
     let currentQuestionsOrder = [];
     let timer;
-    let timeLeft = 15 * 60; 
+    let timeLeft = 10 * 60; // ĐÃ ĐỔI THÀNH 10 PHÚT (VỊ TRÍ 1)
     let isSubmitting = false;
+    let startTime; 
 
     document.addEventListener("DOMContentLoaded", function() {
         displayResults();
@@ -299,7 +302,8 @@
 
         generateShuffledQuiz();
 
-        timeLeft = 15 * 60;
+        timeLeft = 10 * 60; // ĐÃ ĐỔI THÀNH 10 PHÚT (VỊ TRÍ 2)
+        startTime = new Date(); 
         document.getElementById('timerBox').style.color = '#fff';
         timer = setInterval(updateTimer, 1000);
     }
@@ -344,7 +348,7 @@
     function updateTimer() {
         if (timeLeft <= 0) {
             clearInterval(timer);
-            alert('Đã hết thời gian 15 phút làm bài! Hệ thống tự động thu bài và nộp kết quả.');
+            alert('Đã hết thời gian 10 phút làm bài! Hệ thống tự động thu bài và nộp kết quả.');
             submitQuiz(true); 
         } else {
             timeLeft--;
@@ -371,8 +375,14 @@
         isSubmitting = true;
         clearInterval(timer);
 
-        let correctCount = 0;
+        const endTime = new Date();
+        const totalDurationSeconds = Math.floor((endTime - startTime) / 1000);
         
+        const durationMinutes = Math.floor(totalDurationSeconds / 60);
+        const durationSeconds = totalDurationSeconds % 60;
+        const durationString = `${durationMinutes} phút ${durationSeconds} giây`;
+
+        let correctCount = 0;
         originalQuestions.forEach(q => {
             const selected = document.querySelector(`input[name="question_${q.id}"]:checked`);
             if (selected && selected.value === q.correct) {
@@ -380,13 +390,19 @@
             }
         });
 
+        const finalScore = ((correctCount / 15) * 10).toFixed(1);
+
         const now = new Date();
         const timeString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
         const currentResult = {
             name: nameInput,
             time: timeString,
-            score: `${correctCount}/15`
+            timestamp: now.getTime(),
+            correct: correctCount,
+            durationText: durationString,
+            durationSeconds: totalDurationSeconds, 
+            scoreThang10: parseFloat(finalScore)
         };
 
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
@@ -394,7 +410,7 @@
         localStorage.setItem('partyQuizResults', JSON.stringify(allResults));
 
         if (!isTimeout) {
-            alert(`Nộp bài thành công!\nĐồng chí: ${nameInput}\nSố câu trả lời đúng: ${correctCount}/15.`);
+            alert(`Nộp bài thành công!\nĐồng chí: ${nameInput}\nSố câu đúng: ${correctCount}/15\nĐiểm quy đổi: ${finalScore} điểm.`);
         }
 
         document.getElementById('quizForm').style.display = 'none';
@@ -403,7 +419,7 @@
         displayResults();
 
         setTimeout(() => {
-            const retry = confirm("Bạn có muốn làm bài lại không?");
+            const retry = window.confirm("Bạn có muốn làm bài lại không?");
             if (retry) {
                 document.getElementById('fullName').disabled = false;
                 document.getElementById('fullName').value = '';
@@ -416,7 +432,41 @@
                 document.getElementById('startBtn').style.display = 'inline-block';
             }
             isSubmitting = false;
-        }, 500);
+        }, 600);
+    }
+
+    function processRankings(allResults) {
+        const firstAttemptsMap = new Map();
+        const safeArray = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
+        const chronologicalArray = [...safeArray].sort((a, b) => a.timestamp - b.timestamp);
+        
+        chronologicalArray.forEach(res => {
+            if (!firstAttemptsMap.has(res.name)) {
+                firstAttemptsMap.set(res.name, res);
+            }
+        });
+
+        let validEntries = Array.from(firstAttemptsMap.values());
+
+        validEntries.sort((a, b) => {
+            if (b.scoreThang10 !== a.scoreThang10) {
+                return b.scoreThang10 - a.scoreThang10;
+            }
+            return a.durationSeconds - b.durationSeconds;
+        });
+
+        const rankMap = new Map();
+        validEntries.forEach((entry, index) => {
+            if (index > 0 && 
+                validEntries[index - 1].scoreThang10 === entry.scoreThang10 && 
+                validEntries[index - 1].durationSeconds === entry.durationSeconds) {
+                rankMap.set(entry.timestamp, rankMap.get(validEntries[index - 1].timestamp));
+            } else {
+                rankMap.set(entry.timestamp, index + 1);
+            }
+        });
+
+        return rankMap;
     }
 
     function displayResults() {
@@ -424,20 +474,51 @@
         tableBody.innerHTML = '';
         
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
-        
+        allResults = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
+
         if (allResults.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999; font-style: italic;">Chưa có đảng viên nào nộp bài.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #999; font-style: italic;">Chưa có đảng viên nào nộp bài.</td></tr>`;
             return;
         }
 
-        const displayArray = [...allResults].reverse();
-        displayArray.forEach((res, index) => {
+        const rankMap = processRankings(allResults);
+
+        const userMinTimestampMap = new Map();
+        allResults.forEach(res => {
+            if (!userMinTimestampMap.has(res.name) || res.timestamp < userMinTimestampMap.get(res.name)) {
+                userMinTimestampMap.set(res.name, res.timestamp);
+            }
+        });
+
+        let sortedDisplayArray = [...allResults].sort((a, b) => {
+            if (b.scoreThang10 !== a.scoreThang10) {
+                return b.scoreThang10 - a.scoreThang10;
+            }
+            return a.durationSeconds - b.durationSeconds;
+        });
+        
+        sortedDisplayArray.forEach((res, index) => {
+            let rankText = "";
+            let rankClass = "rank-cell";
+
+            const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
+            
+            if (res.timestamp !== firstAttemptTimestamp) {
+                rankText = "GV đã làm lại bài";
+                rankClass = "retry-cell";
+            } else {
+                rankText = rankMap.has(res.timestamp) ? `Hạng ${rankMap.get(res.timestamp)}` : "Chưa xét hạng";
+            }
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="center-cell">${index + 1}</td>
                 <td><strong>${res.name}</strong></td>
                 <td class="center-cell">${res.time}</td>
-                <td class="highlight">${res.score}</td>
+                <td class="center-cell">${res.correct}/15</td>
+                <td class="center-cell">${res.durationText}</td>
+                <td class="score-cell">${res.scoreThang10.toFixed(1)}</td>
+                <td class="${rankClass}">${rankText}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -445,7 +526,6 @@
 
     function secureClearResults() {
         const password = prompt('Vui lòng nhập mật khẩu quản trị để thực hiện xóa toàn bộ dữ liệu:');
-        
         if (password === null) return; 
 
         if (password === 'tplaocai') {
@@ -461,28 +541,47 @@
 
     function exportToExcel() {
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
+        allResults = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
         
         if (allResults.length === 0) {
             alert('Hiện tại chưa có dữ liệu kết quả nào để xuất file Excel!');
             return;
         }
 
+        const rankMap = processRankings(allResults);
+        const userMinTimestampMap = new Map();
+        allResults.forEach(res => {
+            if (!userMinTimestampMap.has(res.name) || res.timestamp < userMinTimestampMap.get(res.name)) {
+                userMinTimestampMap.set(res.name, res.timestamp);
+            }
+        });
+
+        let sortedExcelArray = [...allResults].sort((a, b) => {
+            if (b.scoreThang10 !== a.scoreThang10) {
+                return b.scoreThang10 - a.scoreThang10;
+            }
+            return a.durationSeconds - b.durationSeconds;
+        });
+
         let excelTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
                 <style>
-                    th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 5px; }
-                    td { border: 0.5pt solid #ddd; padding: 5px; }
+                    th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 6px; text-align: center; }
+                    td { border: 0.5pt solid #ddd; padding: 6px; }
                     .title-cell { font-size: 14pt; font-weight: bold; text-align: center; }
                     .center-excel { text-align: center; }
-                    .txt-cell { mso-number-format:"\\@"; text-align: center; }
+                    .txt-cell { x:str; mso-number-format:"\\@"; text-align: center; }
+                    .score-excel { font-weight: bold; color: #da251d; text-align: center; mso-number-format:"0\\.0"; }
+                    .rank-excel { font-weight: bold; color: #27ae60; text-align: center; }
+                    .retry-excel { font-style: italic; color: #7f8c8d; text-align: center; }
                 </style>
             </head>
             <body>
                 <table>
-                    <tr><td colspan="4" class="title-cell">DANH SÁCH ĐẢNG VIÊN HOÀN THÀNH CHUYÊN ĐỀ ĐẠO ĐỨC HỒ CHÍ MINH</td></tr>
-                    <tr><td colspan="4" style="text-align: center; font-style: italic;">Chi bộ Trường THPT Lào Cai</td></tr>
+                    <tr><td colspan="7" class="title-cell">DANH SÁCH ĐẢNG VIÊN HOÀN THÀNH CHUYÊN ĐỀ ĐẠO ĐỨC HỒ CHÍ MINH</td></tr>
+                    <tr><td colspan="7" style="text-align: center; font-style: italic;">Chi bộ Trường THPT Lào Cai</td></tr>
                     <tr><td></td></tr>
                     <thead>
                         <tr>
@@ -490,18 +589,35 @@
                             <th>Họ và Tên</th>
                             <th>Thời Gian Nộp</th>
                             <th>Số câu đúng</th>
+                            <th>Tổng thời gian</th>
+                            <th>Điểm bài thi</th>
+                            <th>Thứ hạng</th>
                         </tr>
                     </thead>
                     <tbody>
         `;
 
-        allResults.forEach((res, index) => {
+        sortedExcelArray.forEach((res, index) => {
+            const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
+            let rankText = "";
+            let rankStyle = "rank-excel";
+
+            if (res.timestamp !== firstAttemptTimestamp) {
+                rankText = "GV đã làm lại bài";
+                rankStyle = "retry-excel";
+            } else {
+                rankText = rankMap.has(res.timestamp) ? `Hạng ${rankMap.get(res.timestamp)}` : "Chưa xét hạng";
+            }
+
             excelTemplate += `
                 <tr>
                     <td class="center-excel">${index + 1}</td>
                     <td><b>${res.name}</b></td>
                     <td class="center-excel">${res.time}</td>
-                    <td class="txt-cell" style="color: #da251d; font-weight: bold;">${res.score} câu</td>
+                    <td class="txt-cell">${res.correct}/15 câu</td>
+                    <td class="center-excel">${res.durationText}</td>
+                    <td class="score-excel">${res.scoreThang10.toFixed(1)}</td>
+                    <td class="${rankStyle}">${rankText}</td>
                 </tr>
             `;
         });

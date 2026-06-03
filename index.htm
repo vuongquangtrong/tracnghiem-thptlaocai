@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÌM HIỂU CHUYÊN ĐỀ CẦN, KIỆM, LIÊM, CHÍNH, CHÍ CÔNG VÔ TƯ</title>
+    <style>
+        :root {
+            --primary-color: #da251d;
+            --secondary-color: #fff200;
+            --text-color: #333;
+            --bg-overlay: rgba(244, 244, 249, 0.92); /* Lớp phủ mờ giúp đọc chữ rõ hơn */
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            /* Tích hợp ảnh lễ khai giảng toàn cảnh làm hình nền trang web */
+            background-image: url('anh-nen.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        /* Lớp phủ đè lên ảnh nền để nội dung thi hiển thị rõ ràng, không bị chói */
+        .page-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-overlay);
+            z-index: 1;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 2; /* Đẩy nội dung lên trên lớp ảnh nền */
+        }
+        .header-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-bottom: 4px solid var(--secondary-color);
+            gap: 20px;
+        }
+        /* Cấu hình hiển thị Logo trường THPT Lào Cai */
+        .school-logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #fff;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        .header-text { flex-grow: 1; text-align: left; }
+        .header-panel h1 { font-size: 22px; margin: 0 0 5px 0; text-transform: uppercase; }
+        .header-panel .sub-title { font-size: 18px; margin: 0 0 10px 0; font-weight: bold; text-transform: uppercase; color: var(--secondary-color); }
+        .header-panel h2 { font-size: 14px; margin: 0; font-weight: normal; opacity: 0.9; }
+        
+        .info-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 30px;
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .info-section label { font-weight: bold; display: block; margin-bottom: 8px; }
+        .info-section input[type="text"] {
+            width: 65%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .btn-start {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .timer-box {
+            position: absolute;
+            right: 20px;
+            top: 25px;
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .quiz-form { display: none; }
+        .question-box { margin-bottom: 25px; padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .question-text { font-weight: 600; margin-bottom: 12px; font-size: 16px; color: #2c3e50; }
+        .options-list { list-style: none; padding-left: 5px; margin: 0; }
+        .options-list li { margin-bottom: 10px; }
+        .options-list label { display: flex; align-items: center; cursor: pointer; font-weight: normal; }
+        .options-list input[type="radio"] { margin-right: 12px; transform: scale(1.1); cursor: pointer; }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 30px;
+            text-transform: uppercase;
+        }
+        .btn-submit:hover { background: #b31b15; }
+
+        .result-section { margin-top: 40px; }
+        .result-section h2 {
+            text-align: center;
+            color: #fff;
+            background: #2c3e50;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; color: #333; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .highlight { font-weight: bold; color: var(--primary-color); text-align: center; }
+        
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            margin-top: -38px;
+            margin-right: 10px;
+            font-weight: normal;
+        }
+        .clear-btn:hover { background: #c0392b; }
+
+        @media (max-width: 600px) {
+            .header-panel { flex-direction: column; text-align: center; }
+            .header-text { text-align: center; }
+            .info-section input[type="text"] { width: 100%; margin-bottom: 10px; }
+            .btn-start { width: 100%; margin-left: 0; }
+            .timer-box { position: static; margin-top: 10px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Lớp phủ nền mờ cố định -->
+<div class="page-overlay"></div>
+
+<div class="container">
+    <div class="header-panel">
+        <!-- Nhúng ảnh ảnh Logo trường THPT Lào Cai [File: 608054565_122097843693196995_1570570104096283905_n.jpg] -->
+        <img src="logo-truong.jpg" alt="Logo THPT Lào Cai" class="school-logo">
+        <div class="header-text">
+            <h1>Hệ Thống Trả Lời Trắc Nghiệm Trực Tuyến</h1>
+            <div class="sub-title">Chi bộ Trường THPT Lào Cai</div>
+            <h2>Chuyên đề: Học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh về thực hành Cần, Kiệm, Liêm, Chính, Chí công vô tư</h2>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <label for="fullName">THÔNG TIN ĐẢNG VIÊN ĐĂNG NHẬP:</label>
+        <input type="text" id="fullName" placeholder="Nhập đầy đủ Họ và Tên của đồng chí...">
+        <button type="button" class="btn-start" id="startBtn" onclick="startQuiz()">Bắt Đầu Làm Bài</button>
+        <div class="timer-box" id="timerBox">Thời gian: 15:00</div>
+    </div>
+
+    <form id="quizForm" class="quiz-form">
+        <div id="quizContainer"></div>
+        <button type="button" class="btn-submit" onclick="submitQuiz(false)">Nộp Bài Trả Lời</button>
+    </form>
+
+    <div class="result-section">
+        <h2>Kết Quả Đảng Viên Đã Nộp Bài
+            <button class="clear-btn" onclick="secureClearResults()">Xóa dữ liệu</button>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">STT</th>
+                    <th style="width: 40%;">Họ và Tên</th>
+                    <th style="width: 35%;">Thời Gian Nộp</th>
+                    <th style="width: 20%; text-align: center;">Số Câu Đúng</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody">
+                <!-- Kết quả hiển thị tại đây -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx[cite: 2]
+    const originalQuestions = [
+        { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
+        { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
+        { id: 3, text: "Chủ tịch Hồ Chí Minh định nghĩa chữ \"Liêm\" có nghĩa là gì?", options: { A: "Thẳng thắn, đứng đắn và không tà", B: "Siêng năng, chăm chỉ, cố gắng dẻo dai", C: "Trong sạch, không tham lam", D: "Đặt lợi ích của mình lên trên lợi ích chung" }, correct: "C" },
+        { id: 4, text: "Theo tư tưởng Hồ Chí Minh, phẩm chất nào được coi là \"gốc rễ của Chính\"?", options: { A: "Cần, Kiệm, Liêm", B: "Chí công vô tư", C: "Tài năng và kỹ thuật", D: "Sự tự phê bình hằng ngày" }, correct: "A" },
+        { id: 5, text: "V văn bản nào của Bộ Chính trị ban hành ngày 09/4/2024 quy định về chuẩn mực đạo đức cách mạng của cán bộ, đảng viên trong giai đoạn mới?", options: { A: "Quy định số 08-QĐ/TW", B: "Chỉ thị số 05-CT/TW", C: "Quy định số 144-QĐ/TW", D: "Chỉ thị số 42-CT/TW" }, correct: "C" },
+        { id: 6, text: "Theo tư tưởng Hồ Chí Minh, một dân tộc biết Cần, Kiệm, biết Liêm sẽ trở thành một dân tộc như thế nào?", options: { A: "Giàu về vật chất, mạnh về tinh thần, là một dân tộc văn minh tiến bộ", B: "Có ưu thế tuyệt đối về quân sự và mở rộng địa giới hành chính", C: "Phát triển biệt lập, không cần giao thương với các quốc gia khác", D: "Có nền kinh tế công nghiệp nặng hiện đại nhất trong khu vực" }, correct: "A" },
+        { id: 7, text: "Điền từ còn thiếu vào lời căn dặn của Bác trong Di chúc: \"Mỗi đảng viên và cán bộ phải thật sự thấm nhuần đạo đức cách mạng, thật sự...\"", options: { A: "trung thực, dũng cảm, tự lực cánh sinh", B: "cần kiệm liêm chính, chí công vô tư", C: "khiêm tốn, giản dị, sát cánh cùng nhân dân", D: "dám nghĩ, dám làm, dám chịu trách nhiệm" }, correct: "B" },
+        { id: 8, text: "Trong hệ giá trị đạo đức cách mạng, Chủ tịch Hồ Chí Minh coi phẩm chất nào là \"nền tảng của phòng, chống tham nhũng\"?", options: { A: "Cần", B: "Kiệm", C: "Liêm", D: "Chính" }, correct: "C" },
+        { id: 9, text: "Điền từ còn thiếu vào lời dạy của Chủ tịch Hồ Chí Minh về mối quan hệ giữa Đạo đức và Tài năng của người cách mạng: \"Người cách mạng phải có đạo đức, không có đạo đức thì dù tài giỏi mấy cũng...\"", options: { A: "dễ bị lôi kéo bởi các thế lực thù địch", B: "không lãnh đạo được Nhân dân", C: "không thể hoàn thành được bất kỳ công việc gì", D: "dễ bị suy thoái và tha hóa về mặt lối sống" }, correct: "B" },
+        { id: 10, text: "Chủ tịch Hồ Chí Minh đã mượn quy luật tự nhiên nào để khẳng định tầm quan trọng và tính tất yếu của bốn đức tính \"Cần, Kiệm, Liêm, Chính\"?", options: { A: "Sự vận động của Trái Đất quanh Mặt Trời và các hiện tượng tự nhiên.", B: "Quy luật bốn mùa của trời (Xuân, Hạ, Thu, Đông) và bốn phương của đất (Đông, Tây, Nam, Bắc).", C: "Quy luật sinh, lão, bệnh, tử trong vòng đời của một con người.", D: "Sự tương tác giữa các yếu tố ngũ hành trong vũ trụ (Kim, Mộc, Thủy, Hỏa, Thổ)." }, correct: "B" },
+        { id: 11, text: "Tại sao trong tư tưởng Hồ Chí Minh, \"Cần\" và \"Kiệm\" lại được ví như hai chân của con người và không thể tách rời?", options: { A: "Vì Cần giúp tạo ra của cải để phát triển, còn Kiệm giúp tích lũy và sử dụng nguồn lực hiệu quả; thiếu một trong hai thì không thể phát triển bền vững.", B: "Vì người không có chữ Cần thì chắc chắn không bao giờ thực hiện được chữ Kiệm.", C: "Vì chữ Kiệm là tiền đề trực tiếp quyết định sự siêng năng và năng suất làm việc của chữ Cần.", D: "Vì đây là hai phẩm chất hoàn toàn giống nhau về mặt nội hàm hành vi." }, correct: "A" },
+        { id: 12, text: "Mối liên kết vận động theo chuỗi giữa các phẩm chất Cần, Kiệm, Liêm, Chính, Chí công vô tư trong hệ giá trị đạo đức Hồ Chí Minh được hiểu như thế nào?", options: { A: "Mỗi phẩm chất hoạt động độc lập và chỉ có giá trị khi cán bộ đứng ở các vị trí quyền lực khác nhau.", B: "Cần tạo giá trị, Kiệm để tích lũy, Liêm để giữ mình trong sạch, Chính để ngay thẳng, và Chí công vô tư để tuyệt đối vì lợi ích chung; mỗi phẩm chất là tiền đề cho phẩm chất tiếp theo.", C: "Chí công vô tư là điểm khởi đầu bắt buộc, sau đó mới rèn luyện đến Cần, Kiệm, Liêm và Chính.", D: "Chính và Liêm là nền tảng ban đầu để tạo ra năng suất lao động cho chữ Cần và chữ Kiệm." }, correct: "B" },
+        { id: 13, text: "Trong bối cảnh chuyển đổi số và tinh gọn bộ máy hiện nay của tỉnh Lào Cai, nội hàm của phẩm chất \"Kiệm\" đã được Đảng bộ tỉnh mở rộng và vận dụng như thế nào để giải quyết các \"lãng phí vô hình\"?", options: { A: "Chỉ tập trung cắt giảm tối đa ngân sách chi tiêu tiền mặt tại các cơ quan hành chính nhà nước.", B: "Không đầu tư vào công nghệ thông tin và hạ tầng số nhằm giữ nguyên nguồn vốn dự trữ công.", C: "Xem \"tiết kiệm\" bao gồm tiết kiệm thời gian, quy trình và nguồn lực xã hội; gắn với cải cách hành chính để xóa bỏ họp hành hình thức, xử lý hồ sơ chậm trễ và thiếu liên thông dữ liệu.", D: "Khuyến khích cán bộ tăng thời gian làm việc thủ công để không làm hao mòn thiết bị điện tử công." }, correct: "C" },
+        { id: 14, text: "Từ thực tiễn kinh tế - xã hội đặc thù của Lào Cai (địa hình chia cắt, tỷ lệ đồng bào dân tộc thiểu số cao, chênh lệch vùng miền lớn), tinh thần \"Chí công vô tư\" trong hoạch định chính sách phát triển của Tỉnh ủy được thể hiện sâu sắc nhất qua hành động nào?", options: { A: "Tập trung toàn bộ nguồn lực kinh tế xây dựng các khu đô thị phát triển tại trung tâm thành phố để thu hút đầu tư.", B: "Phân bổ nguồn lực hài hòa, đặt người dân làm trung tâm; ưu tiên ngân sách cho an sinh xã hội, y tế, giáo dục vùng sâu, vùng xa nhằm thu hẹp khoảng cách phát triển và nâng cao chỉ số hạnh phúc.", C: "Cắt giảm toàn bộ các dự án đầu tư công ở vùng biên giới để tập trung ngân sách cho cải cách tiền lương.", D: "Ưu tiên tuyệt đối lợi ích ngắn hạn của các doanh nghiệp khai khoáng lớn để tăng thu ngân sách nhanh chóng." }, correct: "B" },
+        { id: 15, text: "Để kết hợp chặt chẽ giữa \"xây\" và \"chống\" theo quan điểm vận dụng tư tưởng Hồ Chí Minh tại Lào Cai, giải pháp nào được coi là biện pháp phòng ngừa tham nhũng, lãng phí cốt lõi \"từ sớm, từ xa\" đối với đội ngũ cán bộ?", options: { A: "Chờ đến khi có khiếu nại của người dân mới tiến hành lập đoàn kiểm tra đột xuất.", B: "Thực hiện nghiêm túc, thực chất việc kê khai và công khai minh bạch tài sản, thu nhập; gắn kiểm soát tài sản với kiểm soát quyền lực và trách nhiệm nêu gương của người đứng đầu.", C: "Bí mật toàn bộ các bản kê khai tài sản của cán bộ lãnh đạo để bảo đảm an toàn thông tin cá nhân.", D: "Thay thế hoàn toàn công tác giáo dục chính trị đạo đức bằng hệ thống camera giám sát tại nơi làm việc." }, correct: "B" }
+    ];
+
+    let currentQuestionsOrder = [];
+    let timer;
+    let timeLeft = 15 * 60; 
+    let isSubmitting = false;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        displayResults();
+    });
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startQuiz() {
+        const nameInput = document.getElementById('fullName').value.trim();
+        if (!nameInput) {
+            alert('Vui lòng nhập đầy đủ Họ và Tên trước khi bắt đầu làm bài!');
+            document.getElementById('fullName').focus();
+            return;
+        }
+
+        document.getElementById('fullName').disabled = true;
+        document.getElementById('startBtn').style.display = 'none';
+        
+        document.getElementById('timerBox').style.display = 'block';
+        document.getElementById('quizForm').style.display = 'block';
+
+        generateShuffledQuiz();
+
+        timeLeft = 15 * 60;
+        document.getElementById('timerBox').style.color = '#fff';
+        timer = setInterval(updateTimer, 1000);
+    }
+
+    function generateShuffledQuiz() {
+        const container = document.getElementById('quizContainer');
+        container.innerHTML = '';
+        
+        currentQuestionsOrder = shuffle([...originalQuestions]);
+
+        currentQuestionsOrder.forEach((q, index) => {
+            const qBox = document.createElement('div');
+            qBox.className = 'question-box';
+
+            const qText = document.createElement('div');
+            qText.className = 'question-text';
+            qText.innerText = `Câu ${index + 1}: ${q.text}`;
+            qBox.appendChild(qText);
+
+            const optionKeys = ['A', 'B', 'C', 'D'];
+            const shuffledKeys = shuffle([...optionKeys]);
+
+            const ul = document.createElement('ul');
+            ul.className = 'options-list';
+
+            shuffledKeys.forEach(key => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <label>
+                        <input type="radio" name="question_${q.id}" value="${key}">
+                        ${key}. ${q.options[key]}
+                    </label>
+                `;
+                ul.appendChild(li);
+            });
+
+            qBox.appendChild(ul);
+            container.appendChild(qBox);
+        });
+    }
+
+    function updateTimer() {
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert('Đã hết thời gian 15 phút làm bài! Hệ thống tự động thu bài và nộp kết quả.');
+            submitQuiz(true); 
+        } else {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerBox').innerText = `Thời gian: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 60) {
+                document.getElementById('timerBox').style.color = '#da251d'; 
+            }
+        }
+    }
+
+    function submitQuiz(isTimeout = false) {
+        if (isSubmitting) return;
+        
+        const nameInput = document.getElementById('fullName').value.trim();
+        
+        if (!isTimeout) {
+            if (!confirm('Đồng chí có chắc chắn muốn nộp bài ngay không?')) {
+                return;
+            }
+        }
+
+        isSubmitting = true;
+        clearInterval(timer);
+
+        let correctCount = 0;
+        
+        originalQuestions.forEach(q => {
+            const selected = document.querySelector(`input[name="question_${q.id}"]:checked`);
+            if (selected && selected.value === q.correct) {
+                correctCount++;
+            }
+        });
+
+        const now = new Date();
+        const timeString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+        const currentResult = {
+            name: nameInput,
+            time: timeString,
+            score: `${correctCount}/15`
+        };
+
+        let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
+        allResults.push(currentResult);
+        localStorage.setItem('partyQuizResults', JSON.stringify(allResults));
+
+        if (!isTimeout) {
+            alert(`Nộp bài thành công!\nĐồng chí: ${nameInput}\nSố câu trả lời đúng: ${correctCount}/15.`);
+        }
+
+        document.getElementById('quizForm').style.display = 'none';
+        document.getElementById('timerBox').style.display = 'none';
+        
+        displayResults();
+
+        setTimeout(() => {
+            const retry = confirm("Bạn có muốn làm bài lại không?");
+            if (retry) {
+                document.getElementById('fullName').disabled = false;
+                document.getElementById('fullName').value = '';
+                document.getElementById('startBtn').style.display = 'inline-block';
+                document.getElementById('fullName').focus();
+            } else {
+                alert("Cảm ơn đồng chí đã tham gia hoàn thành chuyên đề!");
+                document.getElementById('fullName').disabled = false;
+                document.getElementById('fullName').value = '';
+                document.getElementById('startBtn').style.display = 'inline-block';
+            }
+            isSubmitting = false;
+        }, 500);
+    }
+
+    function displayResults() {
+        const tableBody = document.getElementById('resultTableBody');
+        tableBody.innerHTML = '';
+        
+        let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
+        
+        if (allResults.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999; font-style: italic;">Chưa có đảng viên nào nộp bài.</td></tr>`;
+            return;
+        }
+
+        const displayArray = [...allResults].reverse();
+        displayArray.forEach((res, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td><strong>${res.name}</strong></td>
+                <td>${res.time}</td>
+                <td class="highlight">${res.score}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function secureClearResults() {
+        const password = prompt('Vui lòng nhập mật khẩu quản trị để thực hiện xóa toàn bộ dữ liệu:');
+        
+        if (password === null) return; 
+
+        if (password === 'tplaocai') {
+            if (confirm('Xác nhận: Đồng chí có chắc chắn muốn xóa sạch toàn bộ danh sách kết quả không?')) {
+                localStorage.removeItem('partyQuizResults');
+                displayResults();
+                alert('Đã xóa sạch toàn bộ dữ liệu thành công.');
+            }
+        } else {
+            alert('Mật khẩu nhập vào không chính xác! Quyền xóa dữ liệu bị từ chối.');
+        }
+    }
+</script>
+
+</body>
+</html>

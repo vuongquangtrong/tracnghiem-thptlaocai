@@ -504,7 +504,7 @@
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
             if (res.timestamp !== firstAttemptTimestamp) {
-                rankText = "GV đã làm lại bài";
+                rankText = "ĐV đã làm lại bài";
                 rankClass = "retry-cell";
             } else {
                 rankText = rankMap.has(res.timestamp) ? `Hạng ${rankMap.get(res.timestamp)}` : "Chưa xét hạng";
@@ -603,7 +603,7 @@
             let rankStyle = "rank-excel";
 
             if (res.timestamp !== firstAttemptTimestamp) {
-                rankText = "GV đã làm lại bài";
+                rankText = "ĐV đã làm lại bài";
                 rankStyle = "retry-excel";
             } else {
                 rankText = rankMap.has(res.timestamp) ? `Hạng ${rankMap.get(res.timestamp)}` : "Chưa xét hạng";

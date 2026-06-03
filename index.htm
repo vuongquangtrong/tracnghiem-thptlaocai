@@ -156,6 +156,9 @@
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #f2f2f2; font-weight: bold; color: #333; }
         tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        /* Căn giữa dữ liệu cột thời gian và số câu đúng */
+        .center-cell { text-align: center; }
         .highlight { font-weight: bold; color: var(--primary-color); text-align: center; }
         
         .excel-btn {
@@ -231,10 +234,10 @@
         <table id="resultTable">
             <thead>
                 <tr>
-                    <th style="width: 10%;">STT</th>
+                    <th style="width: 10%; text-align: center;">STT</th>
                     <th style="width: 40%;">Họ và Tên</th>
-                    <th style="width: 30%;">Thời Gian Nộp</th>
-                    <th style="width: 20%; text-align: center;">Số Câu Đúng</th>
+                    <th style="width: 30%; text-align: center;">Thời Gian Nộp</th>
+                    <th style="width: 20%; text-align: center;">Số câu đúng</th>
                 </tr>
             </thead>
             <tbody id="resultTableBody">
@@ -244,7 +247,7 @@
 </div>
 
 <script>
-    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx
+    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx - ĐÃ SỬA LỖI CẤU TRÚC CÂU 14
     const originalQuestions = [
         { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
         { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
@@ -279,10 +282,6 @@
         }
         return array;
     }
-
-    style = document.createElement('style');
-    style.innerHTML = `.excel-btn { display: flex; align-items: center; }`;
-    document.head.appendChild(style);
 
     function startQuiz() {
         const nameInput = document.getElementById('fullName').value.trim();
@@ -435,9 +434,9 @@
         displayArray.forEach((res, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${index + 1}</td>
+                <td class="center-cell">${index + 1}</td>
                 <td><strong>${res.name}</strong></td>
-                <td>${res.time}</td>
+                <td class="center-cell">${res.time}</td>
                 <td class="highlight">${res.score}</td>
             `;
             tableBody.appendChild(row);
@@ -460,7 +459,6 @@
         }
     }
 
-    // Chức năng xuất dữ liệu bảng điểm trực tiếp ra file Excel chuyên nghiệp
     function exportToExcel() {
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
         
@@ -469,7 +467,6 @@
             return;
         }
 
-        // Tạo tiêu đề và cấu trúc dữ liệu bảng tính HTML chuẩn mã hóa UTF-8
         let excelTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
@@ -478,6 +475,8 @@
                     th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 5px; }
                     td { border: 0.5pt solid #ddd; padding: 5px; }
                     .title-cell { font-size: 14pt; font-weight: bold; text-align: center; }
+                    .center-excel { text-align: center; }
+                    .txt-cell { mso-number-format:"\\@"; text-align: center; }
                 </style>
             </head>
             <body>
@@ -489,21 +488,20 @@
                         <tr>
                             <th>STT</th>
                             <th>Họ và Tên</th>
-                            <th>Thời Gian Nộp Bài</th>
-                            <th>Số Câu Đúng (Trên tổng 15 câu)</th>
+                            <th>Thời Gian Nộp</th>
+                            <th>Số câu đúng</th>
                         </tr>
                     </thead>
                     <tbody>
         `;
 
-        // Đọc dữ liệu đổ vào các dòng Excel (theo thứ tự nộp bài từ cũ đến mới để dễ theo dõi)
         allResults.forEach((res, index) => {
             excelTemplate += `
                 <tr>
-                    <td style="text-align: center;">${index + 1}</td>
+                    <td class="center-excel">${index + 1}</td>
                     <td><b>${res.name}</b></td>
-                    <td>${res.time}</td>
-                    <td style="text-align: center; color: #da251d; font-weight: bold;">${res.score}</td>
+                    <td class="center-excel">${res.time}</td>
+                    <td class="txt-cell" style="color: #da251d; font-weight: bold;">${res.score} câu</td>
                 </tr>
             `;
         });
@@ -515,11 +513,9 @@
             </html>
         `;
 
-        // Tạo liên kết tải tệp (Blob) dạng bảng dữ liệu Excel (.xls)
         const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const link = document.createElement("a");
         
-        // Đặt tên file tự động theo ngày giờ xuất tệp dữ liệu
         const dateObj = new Date();
         const fileDate = `${dateObj.getFullYear()}${(dateObj.getMonth()+1).toString().padStart(2,'0')}${dateObj.getDate().toString().padStart(2,'0')}`;
         

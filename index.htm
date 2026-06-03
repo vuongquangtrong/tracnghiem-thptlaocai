@@ -204,8 +204,6 @@
         .score-cell { font-weight: bold; color: #da251d; text-align: center; }
         .rank-cell { font-weight: bold; color: #27ae60; text-align: center; }
         .retry-cell { font-style: italic; color: #7f8c8d; text-align: center; }
-        
-        /* ĐỊNH DẠNG NỔI BẬT: Chữ in đậm, màu đỏ rực dành riêng cho dòng vi phạm trên web */
         .cheat-cell { font-weight: bold; color: #da251d; text-align: center; font-style: normal; } 
         
         .excel-btn {
@@ -304,7 +302,8 @@
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                </tbody>
+                <!-- Kết quả hiển thị tại đây -->
+            </tbody>
         </table>
     </div>
 </div>
@@ -343,6 +342,7 @@
     let isQuizActive = false;
     let cheatCount = 0;
     let isCheater = false;
+    let lastCheatTime = 0; // Lưu mốc thời gian vi phạm trước đó để lọc trùng tín hiệu (Debounce)
 
     document.addEventListener("DOMContentLoaded", function() {
         displayResults();
@@ -357,19 +357,34 @@
         return array;
     }
 
+    // THUẬT TOÁN ĐÃ ĐƯỢC TỐI ƯU HÓA HOÀN HẢO CHO CẢ ANDROID VÀ IOS
     function setupAntiCheat() {
         document.addEventListener("visibilitychange", function() {
             if (document.hidden && isQuizActive && !isSubmitting) {
+                const now = Date.now();
+                // Nếu khoảng cách giữa 2 tín hiệu dồn dập nhỏ hơn 1500ms (1.5 giây), hệ thống sẽ bỏ qua không đếm trùng
+                if (now - lastCheatTime < 1500) {
+                    return; 
+                }
+                
+                lastCheatTime = now; // Ghi nhận mốc thời gian mới
                 cheatCount++;
+                
                 if (cheatCount === 1) {
+                    // Vi phạm lần 1 trên Mobile/PC: Khóa đồng hồ đếm ngược và bắn hộp thoại nhắc nhở
                     clearInterval(timer);
-                    alert("⚠️ CẢNH BÁO GIAN LẬN:\nĐồng chí vừa rời khỏi màn hình bài thi (chuyển tab hoặc mở trình duyệt khác)!\nNếu vi phạm thêm một lần nữa, hệ thống sẽ tự động THU BÀI và KHÓA KẾT QUẢ ngay lập tức.");
-                    timer = setInterval(updateTimer, 1000);
+                    setTimeout(() => {
+                        alert("⚠️ CẢNH BÁO GIAN LẬN:\nĐồng chí vừa rời khỏi màn hình bài thi (chuyển tab hoặc mở ứng dụng khác)!\nNếu vi phạm thêm một lần nữa, hệ thống sẽ tự động THU BÀI và KHÓA KẾT QUẢ ngay lập tức.");
+                        timer = setInterval(updateTimer, 1000); // Kích hoạt lại đồng hồ sau khi đóng alert
+                    }, 100);
                 } else if (cheatCount >= 2) {
+                    // Vi phạm lần 2 thực tế: Ép buộc khóa bài ngay lập tức
                     isCheater = true;
                     clearInterval(timer);
-                    alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
-                    submitQuiz(false, true);
+                    setTimeout(() => {
+                        alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
+                        submitQuiz(false, true);
+                    }, 100);
                 }
             }
         });
@@ -391,6 +406,7 @@
 
         currentQuestionIndex = 0; 
         cheatCount = 0;
+        lastCheatTime = 0;
         isCheater = false;
         isQuizActive = true; 
 
@@ -658,7 +674,6 @@
 
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
-            // CẬP NHẬT HIỂN THỊ CHUẨN: Hiện "Vi phạm quy chế thi" in đậm màu đỏ rực rỡ
             if (res.isViolator) {
                 rankText = "Vi phạm quy chế thi";
                 rankClass = "cheat-cell";
@@ -726,6 +741,20 @@
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>KetQua_TracNghiem</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
                 <style>
                     th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 6px; text-align: center; }
                     td { border: 0.5pt solid #ddd; padding: 6px; }

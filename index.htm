@@ -145,24 +145,42 @@
             border-radius: 4px;
             text-transform: uppercase;
         }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+        .button-group {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #f2f2f2; font-weight: bold; color: #333; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         .highlight { font-weight: bold; color: var(--primary-color); text-align: center; }
         
+        .excel-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .excel-btn:hover { background: #219150; }
+
         .clear-btn {
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 6px 12px;
-            font-size: 13px;
+            padding: 8px 15px;
+            font-size: 14px;
             border-radius: 4px;
             cursor: pointer;
-            float: right;
-            margin-top: -38px;
-            margin-right: 10px;
-            font-weight: normal;
         }
         .clear-btn:hover { background: #c0392b; }
 
@@ -172,17 +190,16 @@
             .info-section input[type="text"] { width: 100%; margin-bottom: 10px; }
             .btn-start { width: 100%; margin-left: 0; }
             .timer-box { position: static; margin-top: 10px; text-align: center; }
+            .button-group { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-<!-- Lớp phủ nền mờ cố định -->
 <div class="page-overlay"></div>
 
 <div class="container">
     <div class="header-panel">
-        <!-- Nhúng ảnh ảnh Logo trường THPT Lào Cai [File: 608054565_122097843693196995_1570570104096283905_n.jpg] -->
         <img src="logo-truong.jpg" alt="Logo THPT Lào Cai" class="school-logo">
         <div class="header-text">
             <h1>Hệ Thống Trả Lời Trắc Nghiệm Trực Tuyến</h1>
@@ -204,33 +221,36 @@
     </form>
 
     <div class="result-section">
-        <h2>Kết Quả Đảng Viên Đã Nộp Bài
+        <h2>Kết Quả Đảng Viên Đã Nộp Bài</h2>
+        
+        <div class="button-group">
+            <button class="excel-btn" onclick="exportToExcel()">📊 Xuất dữ liệu Excel</button>
             <button class="clear-btn" onclick="secureClearResults()">Xóa dữ liệu</button>
-        </h2>
-        <table>
+        </div>
+
+        <table id="resultTable">
             <thead>
                 <tr>
-                    <th style="width: 5%;">STT</th>
+                    <th style="width: 10%;">STT</th>
                     <th style="width: 40%;">Họ và Tên</th>
-                    <th style="width: 35%;">Thời Gian Nộp</th>
+                    <th style="width: 30%;">Thời Gian Nộp</th>
                     <th style="width: 20%; text-align: center;">Số Câu Đúng</th>
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                <!-- Kết quả hiển thị tại đây -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx[cite: 2]
+    // Dữ liệu câu hỏi gốc lấy từ tệp Câu hỏi SHCB.docx
     const originalQuestions = [
         { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
         { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
         { id: 3, text: "Chủ tịch Hồ Chí Minh định nghĩa chữ \"Liêm\" có nghĩa là gì?", options: { A: "Thẳng thắn, đứng đắn và không tà", B: "Siêng năng, chăm chỉ, cố gắng dẻo dai", C: "Trong sạch, không tham lam", D: "Đặt lợi ích của mình lên trên lợi ích chung" }, correct: "C" },
         { id: 4, text: "Theo tư tưởng Hồ Chí Minh, phẩm chất nào được coi là \"gốc rễ của Chính\"?", options: { A: "Cần, Kiệm, Liêm", B: "Chí công vô tư", C: "Tài năng và kỹ thuật", D: "Sự tự phê bình hằng ngày" }, correct: "A" },
-        { id: 5, text: "V văn bản nào của Bộ Chính trị ban hành ngày 09/4/2024 quy định về chuẩn mực đạo đức cách mạng của cán bộ, đảng viên trong giai đoạn mới?", options: { A: "Quy định số 08-QĐ/TW", B: "Chỉ thị số 05-CT/TW", C: "Quy định số 144-QĐ/TW", D: "Chỉ thị số 42-CT/TW" }, correct: "C" },
+        { id: 5, text: "Văn bản nào của Bộ Chính trị ban hành ngày 09/4/2024 quy định về chuẩn mực đạo đức cách mạng của cán bộ, đảng viên trong giai đoạn mới?", options: { A: "Quy định số 08-QĐ/TW", B: "Chỉ thị số 05-CT/TW", C: "Quy định số 144-QĐ/TW", D: "Chỉ thị số 42-CT/TW" }, correct: "C" },
         { id: 6, text: "Theo tư tưởng Hồ Chí Minh, một dân tộc biết Cần, Kiệm, biết Liêm sẽ trở thành một dân tộc như thế nào?", options: { A: "Giàu về vật chất, mạnh về tinh thần, là một dân tộc văn minh tiến bộ", B: "Có ưu thế tuyệt đối về quân sự và mở rộng địa giới hành chính", C: "Phát triển biệt lập, không cần giao thương với các quốc gia khác", D: "Có nền kinh tế công nghiệp nặng hiện đại nhất trong khu vực" }, correct: "A" },
         { id: 7, text: "Điền từ còn thiếu vào lời căn dặn của Bác trong Di chúc: \"Mỗi đảng viên và cán bộ phải thật sự thấm nhuần đạo đức cách mạng, thật sự...\"", options: { A: "trung thực, dũng cảm, tự lực cánh sinh", B: "cần kiệm liêm chính, chí công vô tư", C: "khiêm tốn, giản dị, sát cánh cùng nhân dân", D: "dám nghĩ, dám làm, dám chịu trách nhiệm" }, correct: "B" },
         { id: 8, text: "Trong hệ giá trị đạo đức cách mạng, Chủ tịch Hồ Chí Minh coi phẩm chất nào là \"nền tảng của phòng, chống tham nhũng\"?", options: { A: "Cần", B: "Kiệm", C: "Liêm", D: "Chính" }, correct: "C" },
@@ -259,6 +279,10 @@
         }
         return array;
     }
+
+    style = document.createElement('style');
+    style.innerHTML = `.excel-btn { display: flex; align-items: center; }`;
+    document.head.appendChild(style);
 
     function startQuiz() {
         const nameInput = document.getElementById('fullName').value.trim();
@@ -434,6 +458,78 @@
         } else {
             alert('Mật khẩu nhập vào không chính xác! Quyền xóa dữ liệu bị từ chối.');
         }
+    }
+
+    // Chức năng xuất dữ liệu bảng điểm trực tiếp ra file Excel chuyên nghiệp
+    function exportToExcel() {
+        let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
+        
+        if (allResults.length === 0) {
+            alert('Hiện tại chưa có dữ liệu kết quả nào để xuất file Excel!');
+            return;
+        }
+
+        // Tạo tiêu đề và cấu trúc dữ liệu bảng tính HTML chuẩn mã hóa UTF-8
+        let excelTemplate = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 5px; }
+                    td { border: 0.5pt solid #ddd; padding: 5px; }
+                    .title-cell { font-size: 14pt; font-weight: bold; text-align: center; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <tr><td colspan="4" class="title-cell">DANH SÁCH ĐẢNG VIÊN HOÀN THÀNH CHUYÊN ĐỀ ĐẠO ĐỨC HỒ CHÍ MINH</td></tr>
+                    <tr><td colspan="4" style="text-align: center; font-style: italic;">Chi bộ Trường THPT Lào Cai</td></tr>
+                    <tr><td></td></tr>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Họ và Tên</th>
+                            <th>Thời Gian Nộp Bài</th>
+                            <th>Số Câu Đúng (Trên tổng 15 câu)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        // Đọc dữ liệu đổ vào các dòng Excel (theo thứ tự nộp bài từ cũ đến mới để dễ theo dõi)
+        allResults.forEach((res, index) => {
+            excelTemplate += `
+                <tr>
+                    <td style="text-align: center;">${index + 1}</td>
+                    <td><b>${res.name}</b></td>
+                    <td>${res.time}</td>
+                    <td style="text-align: center; color: #da251d; font-weight: bold;">${res.score}</td>
+                </tr>
+            `;
+        });
+
+        excelTemplate += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        // Tạo liên kết tải tệp (Blob) dạng bảng dữ liệu Excel (.xls)
+        const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const link = document.createElement("a");
+        
+        // Đặt tên file tự động theo ngày giờ xuất tệp dữ liệu
+        const dateObj = new Date();
+        const fileDate = `${dateObj.getFullYear()}${(dateObj.getMonth()+1).toString().padStart(2,'0')}${dateObj.getDate().toString().padStart(2,'0')}`;
+        
+        link.href = URL.createObjectURL(blob);
+        link.style.display = "none";
+        link.download = `KetQua_TracNghiem_ChiBo_${fileDate}.xls`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 

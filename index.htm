@@ -205,6 +205,9 @@
         .rank-cell { font-weight: bold; color: #27ae60; text-align: center; }
         .retry-cell { font-style: italic; color: #7f8c8d; text-align: center; }
         
+        /* ĐỊNH DẠNG NỔI BẬT: Chữ in đậm, màu đỏ rực dành riêng cho dòng vi phạm trên web */
+        .cheat-cell { font-weight: bold; color: #da251d; text-align: center; font-style: normal; } 
+        
         .excel-btn {
             background: #27ae60;
             color: white;
@@ -307,7 +310,6 @@
 </div>
 
 <script>
-    // NGÂN HÀNG CÂU HỎI HOÀN CHỈNH: GỒM 15 CÂU GỐC + 5 CÂU THÔNG HIỂU MỚI (TỔNG 20 CÂU)
     const originalQuestions = [
         { id: 1, text: "Theo tư tưởng Hồ Chí Minh được nêu trong tài liệu, yếu tố nào phải đi đôi với \"Siêng năng\"?", options: { A: "Kế hoạch", B: "Tiết kiệm", C: "Tham vọng", D: "Sự tự tin" }, correct: "A" },
         { id: 2, text: "Theo Chủ tịch Hồ Chí Minh, thế nào là \"Kiệm\"?", options: { A: "Hà tiện, bủn xỉn, không dám tiêu xài của cải", B: "Tiết kiệm, không xa xỉ, không hoang phí, không bừa bãi", C: "Chỉ chi tiêu cho cá nhân, không đóng góp cho tập thể", D: "Giữ nguyên của cải không sử dụng để tránh hao mòn" }, correct: "B" },
@@ -333,13 +335,18 @@
 
     let currentQuestionsOrder = [];
     let timer;
-    let timeLeft = 15 * 60; // ĐÃ CẤU HÌNH: THỜI GIAN LÀM BÀI ĐÚNG 15 PHÚT
+    let timeLeft = 15 * 60; 
     let isSubmitting = false;
     let startTime; 
     let currentQuestionIndex = 0; 
 
+    let isQuizActive = false;
+    let cheatCount = 0;
+    let isCheater = false;
+
     document.addEventListener("DOMContentLoaded", function() {
         displayResults();
+        setupAntiCheat(); 
     });
 
     function shuffle(array) {
@@ -348,6 +355,24 @@
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
+    }
+
+    function setupAntiCheat() {
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden && isQuizActive && !isSubmitting) {
+                cheatCount++;
+                if (cheatCount === 1) {
+                    clearInterval(timer);
+                    alert("⚠️ CẢNH BÁO GIAN LẬN:\nĐồng chí vừa rời khỏi màn hình bài thi (chuyển tab hoặc mở trình duyệt khác)!\nNếu vi phạm thêm một lần nữa, hệ thống sẽ tự động THU BÀI và KHÓA KẾT QUẢ ngay lập tức.");
+                    timer = setInterval(updateTimer, 1000);
+                } else if (cheatCount >= 2) {
+                    isCheater = true;
+                    clearInterval(timer);
+                    alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
+                    submitQuiz(false, true);
+                }
+            }
+        });
     }
 
     function startQuiz() {
@@ -365,11 +390,15 @@
         document.getElementById('quizForm').style.display = 'block';
 
         currentQuestionIndex = 0; 
+        cheatCount = 0;
+        isCheater = false;
+        isQuizActive = true; 
+
         generateShuffledQuiz();
         buildQuestionGrid(); 
         showQuestion(currentQuestionIndex);
 
-        timeLeft = 15 * 60; // Đồng bộ thời gian reset 15 phút
+        timeLeft = 15 * 60; 
         startTime = new Date(); 
         document.getElementById('timerBox').style.color = '#fff';
         timer = setInterval(updateTimer, 1000);
@@ -486,18 +515,19 @@
         }
     }
 
-    function submitQuiz(isTimeout = false) {
+    function submitQuiz(isTimeout = false, forcedByCheat = false) {
         if (isSubmitting) return;
         
         const nameInput = document.getElementById('fullName').value.trim();
         
-        if (!isTimeout) {
+        if (!isTimeout && !forcedByCheat) {
             if (!confirm('Đồng chí có chắc chắn muốn nộp câu trả lời ngay không?')) {
                 return;
             }
         }
 
         isSubmitting = true;
+        isQuizActive = false;
         clearInterval(timer);
 
         const endTime = new Date();
@@ -505,7 +535,7 @@
         
         const durationMinutes = Math.floor(totalDurationSeconds / 60);
         const durationSeconds = totalDurationSeconds % 60;
-        const durationString = `${durationMinutes} phút ${durationSeconds} giây`;
+        const durationString = forcedByCheat ? "Bị thu bài do gian lận" : `${durationMinutes} phút ${durationSeconds} giây`;
 
         let correctCount = 0;
         originalQuestions.forEach(q => {
@@ -515,9 +545,7 @@
             }
         });
 
-        // ĐÃ TỰ ĐỘNG ĐIỀU CHỈNH: Chia cho 20 câu để quy đổi hệ số điểm 10 chuẩn xác hằng số
         const finalScore = ((correctCount / 20) * 10).toFixed(1);
-
         const now = new Date();
         const timeString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
@@ -528,14 +556,15 @@
             correct: correctCount,
             durationText: durationString,
             durationSeconds: totalDurationSeconds, 
-            scoreThang10: parseFloat(finalScore)
+            scoreThang10: parseFloat(finalScore),
+            isViolator: forcedByCheat || isCheater 
         };
 
         let allResults = JSON.parse(localStorage.getItem('partyQuizResults')) || [];
         allResults.push(currentResult);
         localStorage.setItem('partyQuizResults', JSON.stringify(allResults));
 
-        if (!isTimeout) {
+        if (!isTimeout && !forcedByCheat) {
             alert(`Nộp bài thành công!\nĐồng chí: ${nameInput}\nSố câu đúng: ${correctCount}/20\nĐiểm quy đổi: ${finalScore} điểm.`);
         }
 
@@ -563,7 +592,7 @@
 
     function processRankings(allResults) {
         const firstAttemptsMap = new Map();
-        const safeArray = allResults.filter(res => res && res.name && typeof res.timestamp === 'number');
+        const safeArray = allResults.filter(res => res && res.name && typeof res.timestamp === 'number' && !res.isViolator);
         const chronologicalArray = [...safeArray].sort((a, b) => a.timestamp - b.timestamp);
         
         chronologicalArray.forEach(res => {
@@ -629,7 +658,11 @@
 
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
-            if (res.timestamp !== firstAttemptTimestamp) {
+            // CẬP NHẬT HIỂN THỊ CHUẨN: Hiện "Vi phạm quy chế thi" in đậm màu đỏ rực rỡ
+            if (res.isViolator) {
+                rankText = "Vi phạm quy chế thi";
+                rankClass = "cheat-cell";
+            } else if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankClass = "retry-cell";
             } else {
@@ -702,6 +735,7 @@
                     .score-excel { font-weight: bold; color: #da251d; text-align: center; mso-number-format:"0\\.0"; }
                     .rank-excel { font-weight: bold; color: #27ae60; text-align: center; }
                     .retry-excel { font-style: italic; color: #7f8c8d; text-align: center; }
+                    .cheat-excel { font-weight: bold; color: #da251d; text-align: center; }
                 </style>
             </head>
             <body>
@@ -728,7 +762,10 @@
             let rankText = "";
             let rankStyle = "rank-excel";
 
-            if (res.timestamp !== firstAttemptTimestamp) {
+            if (res.isViolator) {
+                rankText = "Vi phạm quy chế thi";
+                rankStyle = "cheat-excel";
+            } else if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankStyle = "retry-excel";
             } else {

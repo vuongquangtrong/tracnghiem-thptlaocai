@@ -244,7 +244,8 @@
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                </tbody>
+                <!-- Kết quả hiển thị tại đây -->
+            </tbody>
         </table>
     </div>
 </div>
@@ -270,7 +271,7 @@
 
     let currentQuestionsOrder = [];
     let timer;
-    let timeLeft = 10 * 60; // ĐÃ ĐỔI THÀNH 10 PHÚT (VỊ TRÍ 1)
+    let timeLeft = 10 * 60; 
     let isSubmitting = false;
     let startTime; 
 
@@ -302,7 +303,7 @@
 
         generateShuffledQuiz();
 
-        timeLeft = 10 * 60; // ĐÃ ĐỔI THÀNH 10 PHÚT (VỊ TRÍ 2)
+        timeLeft = 10 * 60; 
         startTime = new Date(); 
         document.getElementById('timerBox').style.color = '#fff';
         timer = setInterval(updateTimer, 1000);
@@ -503,6 +504,7 @@
 
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
+            // ĐÃ SỬA CHUỖI THÔNG BÁO THÀNH "ĐV ĐÃ LÀM LẠI BÀI" THEO YÊU CẦU
             if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankClass = "retry-cell";
@@ -567,6 +569,20 @@
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>KetQua_TracNghiem</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
                 <style>
                     th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 6px; text-align: center; }
                     td { border: 0.5pt solid #ddd; padding: 6px; }
@@ -602,6 +618,7 @@
             let rankText = "";
             let rankStyle = "rank-excel";
 
+            // ĐỒNG BỘ CHUỖI HIỂN THỊ TRONG FILE EXCEL XUẤT RA
             if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankStyle = "retry-excel";

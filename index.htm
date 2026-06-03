@@ -178,6 +178,45 @@
         }
         .btn-submit:hover { background: #b31b15; }
 
+        /* THIẾT KẾ MỚI: Hộp thoại cảnh báo ảo (Custom Modal) ép hiển thị trên Android/iOS */
+        .custom-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none; /* Mặc định ẩn */
+        }
+        .modal-content {
+            background: #fff;
+            max-width: 500px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            border-top: 6px solid var(--primary-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: var(--primary-color); margin-top: 0; font-size: 20px; text-transform: uppercase; }
+        .modal-content p { font-size: 15px; color: #333; line-height: 1.5; margin: 15px 0 25px 0; }
+        .modal-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+        }
+        .modal-btn:hover { background: #1a252f; }
+
         .result-section { margin-top: 40px; }
         .result-section h2 {
             text-align: center;
@@ -250,6 +289,14 @@
 
 <div class="page-overlay"></div>
 
+<div class="custom-modal" id="cheatModal">
+    <div class="modal-content">
+        <h3>⚠️ Cảnh Báo Vi Phạm</h3>
+        <p><b>Đồng chí vừa rời khỏi màn hình bài thi (hoặc mở ứng dụng khác)!</b><br><br>Đây là lời nhắc nhở lần thứ nhất. Nếu tiếp tục vi phạm thêm 1 lần nữa, hệ thống sẽ lập tức <b>TỪ CHỐI</b> quyền làm bài và <b>THU BÀI TỰ ĐỘNG</b> ngay lập tức.</p>
+        <button type="button" class="modal-btn" onclick="closeCheatModal()">Tôi đã hiểu và cam kết không vi phạm</button>
+    </div>
+</div>
+
 <div class="container">
     <div class="header-panel">
         <img src="logo-truong.jpg" alt="Logo THPT Lào Cai" class="school-logo">
@@ -302,8 +349,7 @@
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                <!-- Kết quả hiển thị tại đây -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
@@ -342,7 +388,7 @@
     let isQuizActive = false;
     let cheatCount = 0;
     let isCheater = false;
-    let lastCheatTime = 0; // Lưu mốc thời gian vi phạm trước đó để lọc trùng tín hiệu (Debounce)
+    let lastCheatTime = 0; 
 
     document.addEventListener("DOMContentLoaded", function() {
         displayResults();
@@ -357,37 +403,46 @@
         return array;
     }
 
-    // THUẬT TOÁN ĐÃ ĐƯỢC TỐI ƯU HÓA HOÀN HẢO CHO CẢ ANDROID VÀ IOS
+    // THUẬT TOÁN ĐÃ ĐƯỢC THAY ĐỔI CƠ CHẾ MODAL: CHỐNG TRÌNH DUYỆT MOBILE CHẶN WINDOW.ALERT
     function setupAntiCheat() {
         document.addEventListener("visibilitychange", function() {
             if (document.hidden && isQuizActive && !isSubmitting) {
                 const now = Date.now();
-                // Nếu khoảng cách giữa 2 tín hiệu dồn dập nhỏ hơn 1500ms (1.5 giây), hệ thống sẽ bỏ qua không đếm trùng
                 if (now - lastCheatTime < 1500) {
                     return; 
                 }
                 
-                lastCheatTime = now; // Ghi nhận mốc thời gian mới
+                lastCheatTime = now; 
                 cheatCount++;
                 
                 if (cheatCount === 1) {
-                    // Vi phạm lần 1 trên Mobile/PC: Khóa đồng hồ đếm ngược và bắn hộp thoại nhắc nhở
+                    // Vi phạm lần 1: Dừng đồng hồ đếm ngược ngay lập tức
                     clearInterval(timer);
-                    setTimeout(() => {
-                        alert("⚠️ CẢNH BÁO GIAN LẬN:\nĐồng chí vừa rời khỏi màn hình bài thi (chuyển tab hoặc mở ứng dụng khác)!\nNếu vi phạm thêm một lần nữa, hệ thống sẽ tự động THU BÀI và KHÓA KẾT QUẢ ngay lập tức.");
-                        timer = setInterval(updateTimer, 1000); // Kích hoạt lại đồng hồ sau khi đóng alert
-                    }, 100);
                 } else if (cheatCount >= 2) {
-                    // Vi phạm lần 2 thực tế: Ép buộc khóa bài ngay lập tức
+                    // Vi phạm lần 2: Đánh dấu gian lận và tự động khóa hệ thống nộp bài
                     isCheater = true;
                     clearInterval(timer);
-                    setTimeout(() => {
-                        alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
-                        submitQuiz(false, true);
-                    }, 100);
+                }
+            } else if (!document.hidden && isQuizActive && !isSubmitting) {
+                // KHI NGƯỜI DÙNG QUAY LẠI MÀN HÌNH TRÌNH DUYỆT (RESUME/FOCUS)
+                if (isCheater) {
+                    // Nếu đã vi phạm lần 2: Bắn thông báo cuối và ép nộp bài ngay
+                    alert("🚫 ĐÃ VI PHẠM QUY CHẾ THI:\nĐồng chí tiếp tục rời màn hình bài thi lần thứ 2. Hệ thống tự động khóa bài và nộp kết quả ngay lập tức.");
+                    submitQuiz(false, true);
+                } else if (cheatCount === 1) {
+                    // Nếu vi phạm lần 1: Bật hiển thị hộp thoại ảo HTML chặn toàn bộ màn hình điện thoại iOS/Android
+                    document.getElementById('cheatModal').style.display = 'flex';
                 }
             }
         });
+    }
+
+    // Hàm xử lý đóng hộp thoại ảo khi Đảng viên bấm nút xác nhận cam kết
+    function closeCheatModal() {
+        document.getElementById('cheatModal').style.display = 'none';
+        // Kích hoạt lại đồng hồ chạy tiếp tục tính thời gian
+        clearInterval(timer);
+        timer = setInterval(updateTimer, 1000);
     }
 
     function startQuiz() {
@@ -545,6 +600,7 @@
         isSubmitting = true;
         isQuizActive = false;
         clearInterval(timer);
+        document.getElementById('cheatModal').style.display = 'none'; // Ẩn modal nếu đang hiện
 
         const endTime = new Date();
         const totalDurationSeconds = Math.floor((endTime - startTime) / 1000);
@@ -741,20 +797,6 @@
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
-                <!--[if gte mso 9]>
-                <xml>
-                    <x:ExcelWorkbook>
-                        <x:ExcelWorksheets>
-                            <x:ExcelWorksheet>
-                                <x:Name>KetQua_TracNghiem</x:Name>
-                                <x:WorksheetOptions>
-                                    <x:DisplayGridlines/>
-                                </x:WorksheetOptions>
-                            </x:ExcelWorksheet>
-                        </x:ExcelWorksheets>
-                    </x:ExcelWorkbook>
-                </xml>
-                <![endif]-->
                 <style>
                     th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 6px; text-align: center; }
                     td { border: 0.5pt solid #ddd; padding: 6px; }

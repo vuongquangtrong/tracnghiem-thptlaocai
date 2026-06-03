@@ -108,27 +108,74 @@
         }
 
         .quiz-form { display: none; }
-        .question-box { margin-bottom: 25px; padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .question-text { font-weight: 600; margin-bottom: 12px; font-size: 16px; color: #2c3e50; }
-        .options-list { list-style: none; padding-left: 5px; margin: 0; }
-        .options-list li { margin-bottom: 10px; }
-        .options-list label { display: flex; align-items: center; cursor: pointer; font-weight: normal; }
-        .options-list input[type="radio"] { margin-right: 12px; transform: scale(1.1); cursor: pointer; }
+        .progress-text { font-size: 14px; font-weight: bold; color: #7f8c8d; margin-bottom: 10px; text-align: right; }
+        
+        /* Cấu hình bảng số thứ tự câu hỏi điều hướng nhanh */
+        .question-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            justify-content: center;
+        }
+        .grid-item {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #475569;
+        }
+        .grid-item:hover { background: #e2e8f0; }
+        .grid-item.answered { background: #cbd5e1; color: #1e293b; border-color: #94a3b8; } /* Câu đã làm */
+        .grid-item.current { background: #2980b9; color: #fff; border-color: #1f618d; box-shadow: 0 0 6px rgba(41,128,185,0.5); } /* Câu hiện tại */
 
+        .question-box { margin-bottom: 25px; padding: 25px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: none; }
+        .question-box.active { display: block; }
+        .question-text { font-weight: 600; margin-bottom: 15px; font-size: 17px; color: #2c3e50; }
+        .options-list { list-style: none; padding-left: 5px; margin: 0; }
+        .options-list li { margin-bottom: 12px; }
+        .options-list label { display: flex; align-items: center; cursor: pointer; font-weight: normal; padding: 5px; border-radius: 4px; }
+        .options-list label:hover { background-color: #f5f7fa; }
+        .options-list input[type="radio"] { margin-right: 12px; transform: scale(1.15); cursor: pointer; }
+
+        .navigation-group { display: flex; justify-content: space-between; margin-top: 20px; gap: 15px; align-items: center; }
+        .nav-btn {
+            padding: 10px 25px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            min-width: 120px;
+        }
+        .btn-prev { background: #7f8c8d; }
+        .btn-prev:hover { background: #646d6e; }
+        .btn-next { background: #2980b9; }
+        .btn-next:hover { background: #1f618d; }
+        
         .btn-submit {
-            display: block;
-            width: 100%;
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 18px;
+            padding: 12px 30px;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 30px;
             text-transform: uppercase;
+            display: none;
         }
         .btn-submit:hover { background: #b31b15; }
 
@@ -194,6 +241,8 @@
             .button-group { justify-content: center; }
             table { font-size: 11px; }
             th, td { padding: 6px 4px; }
+            .navigation-group { flex-direction: column; gap: 10px; }
+            .nav-btn, .btn-submit { width: 100%; }
         }
     </style>
 </head>
@@ -219,8 +268,17 @@
     </div>
 
     <form id="quizForm" class="quiz-form">
+        <div class="progress-text" id="progressText">Câu 1 / 15</div>
+        
+        <div class="question-grid" id="questionGrid"></div>
+
         <div id="quizContainer"></div>
-        <button type="button" class="btn-submit" onclick="submitQuiz(false)">Nộp câu trả lời</button>
+        
+        <div class="navigation-group">
+            <button type="button" class="nav-btn btn-prev" id="prevBtn" onclick="navigateQuestion(-1)">Câu trước đó</button>
+            <button type="button" class="nav-btn btn-next" id="nextBtn" onclick="navigateQuestion(1)">Câu tiếp theo</button>
+            <button type="button" class="btn-submit" id="submitBtn" onclick="submitQuiz(false)">Nộp câu trả lời</button>
+        </div>
     </form>
 
     <div class="result-section">
@@ -244,8 +302,7 @@
                 </tr>
             </thead>
             <tbody id="resultTableBody">
-                <!-- Kết quả hiển thị tại đây -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
@@ -263,7 +320,7 @@
         { id: 9, text: "Điền từ còn thiếu vào lời dạy của Chủ tịch Hồ Chí Minh về mối quan hệ giữa Đạo đức và Tài năng của người cách mạng: \"Người cách mạng phải có đạo đức, không có đạo đức thì dù tài giỏi mấy cũng...\"", options: { A: "dễ bị lôi kéo bởi các thế lực thù địch", B: "không lãnh đạo được Nhân dân", C: "không thể hoàn thành được bất kỳ công việc gì", D: "dễ bị suy thoái và tha hóa về mặt lối sống" }, correct: "B" },
         { id: 10, text: "Chủ tịch Hồ Chí Minh đã mượn quy luật tự nhiên nào để khẳng định tầm quan trọng và tính tất yếu của bốn đức tính \"Cần, Kiệm, Liêm, Chính\"?", options: { A: "Sự vận động của Trái Đất quanh Mặt Trời và các hiện tượng tự nhiên.", B: "Quy luật bốn mùa của trời (Xuân, Hạ, Thu, Đông) và bốn phương của đất (Đông, Tây, Nam, Bắc).", C: "Quy luật sinh, lão, bệnh, tử trong vòng đời của một con người.", D: "Sự tương tác giữa các yếu tố ngũ hành trong vũ trụ (Kim, Mộc, Thủy, Hỏa, Thổ)." }, correct: "B" },
         { id: 11, text: "Tại sao trong tư tưởng Hồ Chí Minh, \"Cần\" và \"Kiệm\" lại được ví như hai chân của con người và không thể tách rời?", options: { A: "Vì Cần giúp tạo ra của cải để phát triển, còn Kiệm giúp tích lũy và sử dụng nguồn lực hiệu quả; thiếu một trong hai thì không thể phát triển bền vững.", B: "Vì người không có chữ Cần thì chắc chắn không bao giờ thực hiện được chữ Kiệm.", C: "Vì chữ Kiệm là tiền đề trực tiếp quyết định sự siêng năng và năng suất làm việc của chữ Cần.", D: "Vì đây là hai phẩm chất hoàn toàn giống nhau về mặt nội hàm hành vi." }, correct: "A" },
-        { id: 12, text: "Mối liên kết vận động theo chuỗi giữa các phẩm chất Cần, Kiệm, Liêm, Chính, Chí công vô tư trong hệ giá trị đạo đức Hồ Chí Minh được hiểu như thế nào?", options: { A: "Mỗi phẩm chất hoạt động độc lập và chỉ có giá trị khi cán bộ đứng ở các vị trí quyền lực khác nhau.", B: "Cần tạo giá trị, Kiệm để tích lũy, Liêm để giữ mình trong sạch, Chính để ngay thẳng, và Chí công vô tư để tuyệt đối vì lợi ích chung; mỗi phẩm chất là tiền đề cho phẩm chất tiếp theo.", C: "Chí công vô tư là điểm khởi đầu bắt buộc, sau đó mới rèn luyện đến Cần, Kiệm, Liêm và Chính.", D: "Chính và Liêm là nền tảng ban đầu để tạo ra năng suất lao động cho chữ Cần và chữ Kiệm." }, correct: "B" },
+        { id: 12, text: "Mối liên kết vận động theo chuỗi giữa các phẩm chất Cần, Kiệm, Liêm, Chính, Chí công vô tư trong hệ giá trị đạo đức Hồ Chí Minh được hiểu như thế nào?", options: { A: "Mỗi phẩm chất hoạt động độc lập và chỉ có giá trị khi cán bộ đứng ở các vị trí quyền lực khác nhau.", B: "Cần tạo giá trị, Kiệm để tích lũy, Liêm để giữ mình trong sạch, Chính để ngay thẳng, và Chí công vô tư để tuyệt đối vì lợi ích chung; mỗi phẩm chất là tiền đề cho phẩm chất tiếp theo.", C: "Chí công vô tư là điểm khởi đầu bắt buộc, sau đó mới rèn luyện đến Cần, Kiệm, Liêm and Chính.", D: "Chính và Liêm là nền tảng ban đầu để tạo ra năng suất lao động cho chữ Cần và chữ Kiệm." }, correct: "B" },
         { id: 13, text: "Trong bối cảnh chuyển đổi số và tinh gọn bộ máy hiện nay của tỉnh Lào Cai, nội hàm của phẩm chất \"Kiệm\" đã được Đảng bộ tỉnh mở rộng và vận dụng như thế nào để giải quyết các \"lãng phí vô hình\"?", options: { A: "Chỉ tập trung cắt giảm tối đa ngân sách chi tiêu tiền mặt tại các cơ quan hành chính nhà nước.", B: "Không đầu tư vào công nghệ thông tin và hạ tầng số nhằm giữ nguyên nguồn vốn dự trữ công.", C: "Xem \"tiết kiệm\" bao gồm tiết kiệm thời gian, quy trình và nguồn lực xã hội; gắn với cải cách hành chính để xóa bỏ họp hành hình thức, xử lý hồ sơ chậm trễ và thiếu liên thông dữ liệu.", D: "Khuyến khích cán bộ tăng thời gian làm việc thủ công để không làm hao mòn thiết bị điện tử công." }, correct: "C" },
         { id: 14, text: "Từ thực tiễn kinh tế - xã hội đặc thù của Lào Cai (địa hình chia cắt, tỷ lệ đồng bào dân tộc thiểu số cao, chênh lệch vùng miền lớn), tinh thần \"Chí công vô tư\" trong hoạch định chính sách phát triển của Tỉnh ủy được thể hiện sâu sắc nhất qua hành động nào?", options: { A: "Tập trung toàn bộ nguồn lực kinh tế xây dựng các khu đô thị phát triển tại trung tâm thành phố để thu hút đầu tư.", B: "Phân bổ nguồn lực hài hòa, đặt người dân làm trung tâm; ưu tiên ngân sách cho an sinh xã hội, y tế, giáo dục vùng sâu, vùng xa nhằm thu hẹp khoảng cách phát triển và nâng cao chỉ số hạnh phúc.", C: "Cắt giảm toàn bộ các dự án đầu tư công ở vùng biên giới để tập trung ngân sách cho cải cách tiền lương.", D: "Ưu tiên tuyệt đối lợi ích ngắn hạn của các doanh nghiệp khai khoáng lớn để tăng thu ngân sách nhanh chóng." }, correct: "B" },
         { id: 15, text: "Để kết hợp chặt chẽ giữa \"xây\" và \"chống\" theo quan điểm vận dụng tư tưởng Hồ Chí Minh tại Lào Cai, giải pháp nào được coi là biện pháp phòng ngừa tham nhũng, lãng phí cốt lõi \"từ sớm, từ xa\" đối với đội ngũ cán bộ?", options: { A: "Chờ đến khi có khiếu nại của người dân mới tiến hành lập đoàn kiểm tra đột xuất.", B: "Thực hiện nghiêm túc, thực chất việc kê khai và công khai minh bạch tài sản, thu nhập; gắn kiểm soát tài sản với kiểm soát quyền lực và trách nhiệm nêu gương của người đứng đầu.", C: "Bí mật toàn bộ các bản kê khai tài sản của cán bộ lãnh đạo để bảo đảm an toàn thông tin cá nhân.", D: "Thay thế hoàn toàn công tác giáo dục chính trị đạo đức bằng hệ thống camera giám sát tại nơi làm việc." }, correct: "B" }
@@ -274,6 +331,7 @@
     let timeLeft = 10 * 60; 
     let isSubmitting = false;
     let startTime; 
+    let currentQuestionIndex = 0; 
 
     document.addEventListener("DOMContentLoaded", function() {
         displayResults();
@@ -301,7 +359,10 @@
         document.getElementById('timerBox').style.display = 'block';
         document.getElementById('quizForm').style.display = 'block';
 
+        currentQuestionIndex = 0; 
         generateShuffledQuiz();
+        buildQuestionGrid(); // Khởi tạo bảng ô số thứ tự điều hướng nhanh
+        showQuestion(currentQuestionIndex);
 
         timeLeft = 10 * 60; 
         startTime = new Date(); 
@@ -318,9 +379,11 @@
         currentQuestionsOrder.forEach((q, index) => {
             const qBox = document.createElement('div');
             qBox.className = 'question-box';
+            qBox.id = `qBox_${index}`;
 
             const qText = document.createElement('div');
             qText.className = 'question-text';
+            // THIẾT KẾ BỔ SUNG: Hiện rõ số thứ tự câu ở đầu nội dung
             qText.innerText = `Câu ${index + 1}: ${q.text}`;
             qBox.appendChild(qText);
 
@@ -334,7 +397,7 @@
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <label>
-                        <input type="radio" name="question_${q.id}" value="${key}">
+                        <input type="radio" name="question_${q.id}" value="${key}" onchange="updateGridStatus(${index})">
                         ${key}. ${q.options[key]}
                     </label>
                 `;
@@ -344,6 +407,66 @@
             qBox.appendChild(ul);
             container.appendChild(qBox);
         });
+    }
+
+    // BỔ SUNG CHỨC NĂNG: Xây dựng bảng ô số điều hướng từ 1 đến 15
+    function buildQuestionGrid() {
+        const gridContainer = document.getElementById('questionGrid');
+        gridContainer.innerHTML = '';
+        
+        currentQuestionsOrder.forEach((_, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'grid-item';
+            btn.id = `gridItem_${index}`;
+            btn.innerText = index + 1;
+            btn.onclick = function() {
+                currentQuestionIndex = index;
+                showQuestion(currentQuestionIndex);
+            };
+            gridContainer.appendChild(btn);
+        });
+    }
+
+    // Cập nhật trạng thái màu sắc ô số khi Đảng viên thay đổi đáp án
+    function updateGridStatus(index) {
+        const gridItem = document.getElementById(`gridItem_${index}`);
+        if (gridItem) {
+            gridItem.classList.add('answered');
+        }
+    }
+
+    function showQuestion(index) {
+        const allBoxes = document.querySelectorAll('.question-box');
+        allBoxes.forEach(box => box.classList.remove('active'));
+
+        const currentBox = document.getElementById(`qBox_${index}`);
+        if (currentBox) currentBox.classList.add('active');
+
+        document.getElementById('progressText').innerText = `Câu ${index + 1} / ${currentQuestionsOrder.length}`;
+
+        // Cập nhật trạng thái in đậm/đổi màu ô hiện tại trong bảng Grid số thứ tự
+        const allGridItems = document.querySelectorAll('.grid-item');
+        allGridItems.forEach(item => item.classList.remove('current'));
+        const currentGridItem = document.getElementById(`gridItem_${index}`);
+        if (currentGridItem) currentGridItem.classList.add('current');
+
+        document.getElementById('prevBtn').style.visibility = (index === 0) ? 'hidden' : 'visible';
+
+        if (index === currentQuestionsOrder.length - 1) {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+    }
+
+    function navigateQuestion(step) {
+        const nextIndex = currentQuestionIndex + step;
+        if (nextIndex >= 0 && nextIndex < currentQuestionsOrder.length) {
+            currentQuestionIndex = nextIndex;
+            showQuestion(currentQuestionIndex);
+        }
     }
 
     function updateTimer() {
@@ -368,7 +491,7 @@
         const nameInput = document.getElementById('fullName').value.trim();
         
         if (!isTimeout) {
-            if (!confirm('Đồng chí có chắc chắn muốn nộp bài ngay không?')) {
+            if (!confirm('Đồng chí có chắc chắn muốn nộp câu trả lời ngay không?')) {
                 return;
             }
         }
@@ -504,7 +627,6 @@
 
             const firstAttemptTimestamp = userMinTimestampMap.get(res.name);
             
-            // ĐÃ SỬA CHUỖI THÔNG BÁO THÀNH "ĐV ĐÃ LÀM LẠI BÀI" THEO YÊU CẦU
             if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankClass = "retry-cell";
@@ -569,20 +691,6 @@
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
-                <!--[if gte mso 9]>
-                <xml>
-                    <x:ExcelWorkbook>
-                        <x:ExcelWorksheets>
-                            <x:ExcelWorksheet>
-                                <x:Name>KetQua_TracNghiem</x:Name>
-                                <x:WorksheetOptions>
-                                    <x:DisplayGridlines/>
-                                </x:WorksheetOptions>
-                            </x:ExcelWorksheet>
-                        </x:ExcelWorksheets>
-                    </x:ExcelWorkbook>
-                </xml>
-                <![endif]-->
                 <style>
                     th { background-color: #f2f2f2; font-weight: bold; border: 0.5pt solid #ddd; padding: 6px; text-align: center; }
                     td { border: 0.5pt solid #ddd; padding: 6px; }
@@ -618,7 +726,6 @@
             let rankText = "";
             let rankStyle = "rank-excel";
 
-            // ĐỒNG BỘ CHUỖI HIỂN THỊ TRONG FILE EXCEL XUẤT RA
             if (res.timestamp !== firstAttemptTimestamp) {
                 rankText = "ĐV đã làm lại bài";
                 rankStyle = "retry-excel";
